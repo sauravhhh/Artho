@@ -137,13 +137,62 @@
     padding:12px 16px calc(12px + env(safe-area-inset-bottom));
     background:var(--bg); border-top:1px solid var(--border);
   }
+
+  /* ---------- hamburger + drawer ---------- */
+  .topbar-left { display:flex; align-items:center; gap:10px; }
+  .drawer-backdrop {
+    position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:90;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .drawer-backdrop.show { opacity:1; pointer-events:auto; }
+  .drawer {
+    position:fixed; top:0; left:0; bottom:0; width:272px; max-width:82vw; z-index:95;
+    background:var(--card); border-right:1px solid var(--border);
+    transform:translateX(-105%); transition:transform .28s ease;
+    display:flex; flex-direction:column; padding:18px 12px;
+    box-shadow:4px 0 24px rgba(0,0,0,.18);
+  }
+  .drawer.open { transform:none; }
+  .drawer-head {
+    display:flex; align-items:center; gap:10px;
+    font-size:20px; font-weight:800; padding:6px 14px 18px; letter-spacing:-.01em;
+  }
+  .drawer-head .dot { width:11px; height:11px; border-radius:50%; background:var(--accent); }
+  .drawer-head em { font-style:normal; color:var(--accent); }
+  .drawer-item {
+    display:flex; align-items:center; gap:14px; width:100%;
+    border:none; background:transparent; color:var(--text);
+    font-family:inherit; font-size:16px; font-weight:600;
+    padding:13px 14px; border-radius:12px; cursor:pointer; text-align:left;
+  }
+  .drawer-item i { width:22px; text-align:center; color:var(--muted); font-size:17px; }
+  .drawer-item.active { background:var(--accent-soft); color:var(--accent); }
+  .drawer-item.active i { color:var(--accent); }
+  .drawer-foot { margin-top:auto; padding:14px; font-size:12.5px; color:var(--muted); }
+
+  /* ---------- about view ---------- */
+  .about-card h2 { font-size:24px; font-weight:800; letter-spacing:-.01em; margin-bottom:10px; }
+  .about-card h3 { font-size:14px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:var(--accent); margin:20px 0 8px; }
+  .about-card p { font-size:15.5px; margin-bottom:10px; }
+  .about-card p.muted { color:var(--muted); font-size:13.5px; margin-top:16px; }
 </style>
 </head>
 <body>
 
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<nav class="drawer" id="drawer" aria-label="Menu">
+  <div class="drawer-head"><span class="dot"></span><span>অর্থ<em>.</em></span></div>
+  <button class="drawer-item active" data-view="dict"><i class="fas fa-book-open"></i>Dictionary</button>
+  <button class="drawer-item" data-view="about"><i class="fas fa-circle-info"></i>About</button>
+  <div class="drawer-foot">Artho v1.0</div>
+</nav>
+
 <div class="sticky">
   <div class="topbar">
-    <div class="brand"><span class="dot"></span><span>অর্থ<em>.</em></span></div>
+    <div class="topbar-left">
+      <button class="icon-btn" id="menuBtn" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+      <div class="brand"><span class="dot"></span><span>অর্থ<em>.</em></span></div>
+    </div>
     <button class="icon-btn" id="themeBtn" aria-label="Toggle dark mode"><i class="fas fa-moon"></i></button>
   </div>
   <div class="controls">
@@ -163,6 +212,16 @@
 <main class="wrap">
   <div id="result"></div>
 </main>
+
+<section class="wrap about-view" id="aboutView" hidden>
+  <div class="word-card about-card">
+    <h2>About Artho</h2>
+    <p><b>Artho (অর্থ)</b> is a fast, mobile-friendly English–Assamese and Assamese–English dictionary. Type a word to get its meanings instantly.</p>
+    <h3>About the developer</h3>
+    <p><b>Saurabh Saha</b> is a coder and app developer from Assam, India, certified by Google in Digital Marketing. He builds lightweight, fast mobile apps and web tools — Artho is one of them.</p>
+    <p class="muted">Artho v1.0 · Made with ❤️ by sauravhhh</p>
+  </div>
+</section>
 
 <div class="toast" id="toast"></div>
 
@@ -198,6 +257,35 @@
   themeBtn.addEventListener('click', function () {
     setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
   });
+
+  /* ---------- hamburger drawer + views ---------- */
+  var menuBtn = $('menuBtn'), drawer = $('drawer'), backdrop = $('drawerBackdrop'),
+      aboutView = $('aboutView'),
+      dictViews = [document.querySelector('.sticky'), document.querySelector('main.wrap')];
+  function openDrawer() { drawer.classList.add('open'); backdrop.classList.add('show'); }
+  function closeDrawer() { drawer.classList.remove('open'); backdrop.classList.remove('show'); }
+  menuBtn.addEventListener('click', openDrawer);
+  backdrop.addEventListener('click', closeDrawer);
+  function showView(v) {
+    var about = v === 'about';
+    aboutView.hidden = !about;
+    dictViews.forEach(function (el) { if (el) el.style.display = about ? 'none' : ''; });
+    document.querySelectorAll('.drawer-item').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.view === v);
+    });
+    closeDrawer();
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll('.drawer-item').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var h = '#' + b.dataset.view;
+      if (location.hash === h) { showView(b.dataset.view); }
+      else { location.hash = h; }
+    });
+  });
+  function applyHash() { showView(location.hash === '#about' ? 'about' : 'dict'); }
+  window.addEventListener('hashchange', applyHash);
+  applyHash();
 
   /* ---------- toast ---------- */
   var toastEl = $('toast'), toastTimer = null;

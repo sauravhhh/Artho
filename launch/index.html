@@ -22,83 +22,44 @@
     content:""; position:fixed; inset:0; pointer-events:none;
     background:radial-gradient(520px 340px at 50% 30%, rgba(240,190,85,.12), transparent 70%);
   }
+  .particle{
+    position:fixed; bottom:-8vh; z-index:0; pointer-events:none;
+    color:#F0BE55; opacity:0; font-family:'Noto Serif Bengali',serif;
+    animation:rise linear infinite;
+  }
+  @keyframes rise{
+    0%{transform:translateY(0) rotate(0deg); opacity:0}
+    12%{opacity:.26}
+    85%{opacity:.10}
+    100%{transform:translateY(-115vh) rotate(28deg); opacity:0}
+  }
   main{position:relative; width:100%; max-width:480px}
-  .kicker{color:#F0BE55; font-weight:600; font-size:15px; letter-spacing:2px; margin-bottom:26px}
   h1{
     font-family:'Noto Serif Bengali',serif; font-weight:900;
     font-size:clamp(42px,11vw,64px); line-height:1.4; margin-bottom:30px;
   }
   h1 .l1{color:#FFF6E9; display:block}
   h1 .l2{color:#F0BE55; display:block}
-  .soon{color:#b9a98f; font-size:17px; margin-bottom:34px}
-  form{display:flex; gap:10px; max-width:400px; margin:0 auto}
-  input[type=email]{
-    flex:1; min-width:0; background:#141419; border:1px solid rgba(240,190,85,.16);
-    border-radius:12px; color:#FFF6E9; font-size:16px; padding:14px 16px;
-    font-family:inherit; outline:none;
-  }
-  input[type=email]:focus{border-color:#F0BE55}
-  button{
-    background:#F0BE55; color:#191104; border:0; border-radius:12px;
-    font-family:inherit; font-weight:700; font-size:16px; padding:14px 22px;
-    cursor:pointer; white-space:nowrap;
-  }
-  button:active{transform:scale(.97)}
-  button:disabled{opacity:.6; cursor:wait}
-  .done{color:#F0BE55; font-size:17px; line-height:1.7}
-  .err{color:#ff9d8a; font-size:14px; margin-top:12px; min-height:20px}
-  @media (max-width:420px){ form{flex-direction:column} button{width:100%} }
+  .soon{color:#b9a98f; font-size:17px}
 </style>
 </head>
 <body>
 <main>
-  <div class="kicker">অৰ্থ অভিধান</div>
   <h1><span class="l1">শব্দ আছে।</span><span class="l2">অৰ্থটো ক'ত?</span></h1>
   <p class="soon">সোনকালেই আহি আছে</p>
-  <div id="notifyBox">
-    <form id="notifyForm" novalidate>
-      <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email">
-      <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
-      <button type="submit" id="notifyBtn">জনাওক</button>
-    </form>
-    <div class="err" id="errMsg"></div>
-  </div>
 </main>
 <script>
-  const form = document.getElementById('notifyForm');
-  const box = document.getElementById('notifyBox');
-  const errMsg = document.getElementById('errMsg');
-  const btn = document.getElementById('notifyBtn');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    errMsg.textContent = '';
-    const email = document.getElementById('email').value.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errMsg.textContent = 'সঠিক email দিয়ক।';
-      return;
-    }
-    btn.disabled = true; btn.textContent = 'পঠিওৱা হৈ আছে…';
-    try {
-      const res = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          access_key: 'dd136e0b-9b10-48d4-91e5-6a4aa4598625',
-          subject: 'Artho launch — notify me signup',
-          from_name: 'Artho Launch Page',
-          email: email,
-          message: 'Please notify me when the Artho app launches: ' + email
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        box.innerHTML = '<div class="done">ধন্যবাদ!<br>মুক্তিৰ দিনা আপোনাক জনাম।</div>';
-      } else { throw new Error('failed'); }
-    } catch (err) {
-      errMsg.textContent = 'কিবা ভুল হ’ল। অলপ পাছত চেষ্টা কৰক।';
-      btn.disabled = false; btn.textContent = 'জনাওক';
-    }
-  });
+  const letters = ['অ','আ','ক','খ','গ','চ','জ','ট','ত','প','ম','য','ৰ','ল','শ','স','হ','ং'];
+  for (let i = 0; i < 16; i++) {
+    const s = document.createElement('span');
+    s.className = 'particle';
+    s.textContent = letters[Math.floor(Math.random() * letters.length)];
+    s.style.left = (Math.random() * 100) + 'vw';
+    s.style.fontSize = (14 + Math.random() * 26) + 'px';
+    s.style.animationDuration = (9 + Math.random() * 10) + 's';
+    s.style.animationDelay = (Math.random() * 12) + 's';
+    document.body.appendChild(s);
+  }
 </script>
 </body>
 </html>

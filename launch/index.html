@@ -37,18 +37,70 @@
   h1{
     font-family:'Noto Serif Bengali',serif; font-weight:900;
     font-size:clamp(42px,11vw,64px); line-height:1.4; margin-bottom:30px;
+    min-height:2.8em;
   }
   h1 .l1{color:#FFF6E9; display:block}
   h1 .l2{color:#F0BE55; display:block}
-  .soon{color:#b9a98f; font-size:17px}
+  .cursor{
+    display:inline-block; width:.55em; height:1.05em; background:#F0BE55;
+    vertical-align:-.12em; margin-left:.06em; animation:blink 1s steps(1) infinite;
+  }
+  @keyframes blink{ 0%,55%{opacity:1} 56%,100%{opacity:0} }
+  .soon{color:#b9a98f; font-size:17px; opacity:0; transition:opacity 1.2s ease}
+  .soon.shown{opacity:1}
+  @media (prefers-reduced-motion:reduce){
+    .cursor{animation:none} .soon{opacity:1; transition:none}
+  }
 </style>
 </head>
 <body>
 <main>
-  <h1><span class="l1">শব্দ আছে।</span><span class="l2">অৰ্থটো ক'ত?</span></h1>
-  <p class="soon">সোনকালেই আহি আছে</p>
+  <h1 aria-label="শব্দ আছে। অৰ্থটো ক'ত?"><span class="l1" id="line1"></span><span class="l2" id="line2"></span></h1>
+  <p class="soon" id="soon">সোনকালেই আহি আছে</p>
 </main>
 <script>
+  // typewriter headline (grapheme-safe for Assamese script)
+  const LINES = [
+    { el: document.getElementById('line1'), text: 'শব্দ আছে।' },
+    { el: document.getElementById('line2'), text: "অৰ্থটো ক'ত?" }
+  ];
+  const soon = document.getElementById('soon');
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  cursor.setAttribute('aria-hidden', 'true');
+
+  function graphemes(str) {
+    if (window.Intl && Intl.Segmenter) {
+      return [...new Intl.Segmenter('as', { granularity: 'grapheme' }).segment(str)]
+        .map(s => s.segment);
+    }
+    return [...str];
+  }
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  async function typeLine(line) {
+    line.el.appendChild(cursor);
+    for (const g of graphemes(line.text)) {
+      line.el.insertBefore(document.createTextNode(g), cursor);
+      await sleep(85 + Math.random() * 70);
+    }
+  }
+
+  (async () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      LINES.forEach(l => l.el.textContent = l.text);
+      soon.classList.add('shown');
+      return;
+    }
+    await sleep(500);
+    await typeLine(LINES[0]);
+    await sleep(450);
+    await typeLine(LINES[1]);
+    await sleep(600);
+    soon.classList.add('shown');
+  })();
+
+  // floating Assamese letter particles
   const letters = ['অ','আ','ক','খ','গ','চ','জ','ট','ত','প','ম','য','ৰ','ল','শ','স','হ','ং'];
   for (let i = 0; i < 16; i++) {
     const s = document.createElement('span');

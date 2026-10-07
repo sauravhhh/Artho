@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="as">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artho — সোনকালেই আহি আছে</title>
+<meta name="description" content="শব্দ আছে। অৰ্থটো ক'ত? Artho — the Assamese dictionary app — is coming to app stores soon.">
+<meta name="theme-color" content="#0a0a0d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0a0d'/%3E%3Ctext x='32' y='44' font-size='36' text-anchor='middle' fill='%23F0BE55' font-family='serif'%3E%E0%A6%85%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@700;900&family=Noto+Sans+Bengali:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0d; --cream:#FFF6E9; --gold:#F0BE55; --muted:#b9a98f;
+    --card:#141419; --line:rgba(240,190,85,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--bg); color:var(--cream);
+    font-family:'Noto Sans Bengali',system-ui,sans-serif;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    overflow-x:hidden; position:relative;
+  }
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(520px 340px at 50% 18%, rgba(240,190,85,.14), transparent 70%),
+      radial-gradient(700px 500px at 50% 110%, rgba(240,190,85,.06), transparent 70%);
+  }
+  .particle{
+    position:fixed; bottom:-8vh; z-index:0; pointer-events:none;
+    color:var(--gold); opacity:0; font-family:'Noto Serif Bengali',serif;
+    animation:rise linear infinite;
+  }
+  @keyframes rise{
+    0%{transform:translateY(0) rotate(0deg); opacity:0}
+    12%{opacity:.28}
+    85%{opacity:.12}
+    100%{transform:translateY(-115vh) rotate(28deg); opacity:0}
+  }
+  main{
+    z-index:1; width:100%; max-width:560px; padding:64px 24px 40px;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    flex:1;
+  }
+  .kicker{
+    color:var(--gold); font-weight:600; font-size:15px; letter-spacing:2px;
+    margin-bottom:28px;
+  }
+  h1{
+    font-family:'Noto Serif Bengali',serif; font-weight:900;
+    font-size:clamp(44px,11vw,68px); line-height:1.35;
+  }
+  h1 .l1{color:var(--cream); display:block}
+  h1 .l2{color:var(--gold); display:block}
+  .divider{color:var(--muted); margin:26px 0; font-size:20px; letter-spacing:8px}
+  .soon-pill{
+    border:1px solid var(--line); border-radius:999px;
+    padding:10px 26px; font-size:17px; font-weight:600; color:var(--cream);
+    background:rgba(240,190,85,.06); margin-bottom:14px;
+  }
+  .sub{color:var(--muted); font-size:15.5px; line-height:1.7; max-width:400px}
+  .features{
+    display:flex; gap:10px; margin:34px 0 8px; flex-wrap:wrap; justify-content:center;
+  }
+  .feat{
+    font-size:14px; color:var(--cream); background:var(--card);
+    border:1px solid var(--line); border-radius:12px; padding:10px 16px;
+  }
+  .feat::before{content:""; display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:var(--gold); margin-right:9px; vertical-align:1px}
+  .notify{
+    width:100%; background:var(--card); border:1px solid var(--line);
+    border-radius:18px; padding:26px 22px; margin-top:30px;
+  }
+  .notify h2{font-size:19px; font-weight:600; margin-bottom:6px}
+  .notify p{color:var(--muted); font-size:14px; margin-bottom:18px; line-height:1.6}
+  form{display:flex; gap:10px}
+  input[type=email]{
+    flex:1; min-width:0; background:#0d0d12; border:1px solid var(--line);
+    border-radius:12px; color:var(--cream); font-size:16px; padding:14px 16px;
+    font-family:inherit; outline:none;
+  }
+  input[type=email]:focus{border-color:var(--gold)}
+  button{
+    background:var(--gold); color:#191104; border:0; border-radius:12px;
+    font-family:inherit; font-weight:700; font-size:16px; padding:14px 22px;
+    cursor:pointer; white-space:nowrap;
+  }
+  button:active{transform:scale(.97)}
+  button:disabled{opacity:.6; cursor:wait}
+  .done{color:var(--gold); font-size:16px; line-height:1.7; padding:8px 0}
+  .err{color:#ff9d8a; font-size:14px; margin-top:12px; min-height:20px}
+  footer{
+    z-index:1; padding:0 24px 34px; text-align:center;
+    color:var(--muted); font-size:13px; line-height:1.8;
+  }
+  footer .dev{color:var(--cream)}
+  @media (max-width:420px){ form{flex-direction:column} button{width:100%} }
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">অৰ্থ অভিধান</div>
+  <h1><span class="l1">শব্দ আছে।</span><span class="l2">অৰ্থটো ক'ত?</span></h1>
+  <div class="divider">—</div>
+  <div class="soon-pill">সোনকালেই আহি আছে</div>
+  <p class="sub">The Artho app is coming to app stores.<br>অসমীয়া অভিধান, now in your pocket.</p>
+
+  <div class="features">
+    <span class="feat">অসমীয়া–ইংৰাজী অৰ্থ</span>
+    <span class="feat">প্ৰিয় তালিকা</span>
+    <span class="feat">শব্দ শুনক</span>
+  </div>
+
+  <div class="notify" id="notifyBox">
+    <h2>মুক্তিৰ দিনা জনাম</h2>
+    <p>Get notified the moment Artho launches.<br>আপোনাৰ email দিয়ক — মাত্ৰ এটা mail যাব।</p>
+    <form id="notifyForm" novalidate>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email">
+      <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
+      <button type="submit" id="notifyBtn">জনাওক</button>
+    </form>
+    <div class="err" id="errMsg"></div>
+  </div>
+</main>
+<footer>
+  Coming soon to app stores<br>
+  <span class="dev">Developed by Saurabh Saha</span>
+</footer>
+
+<script>
+  // floating Assamese letter particles
+  const letters = ['অ','আ','ক','খ','গ','চ','জ','ট','ত','প','ম','য','ৰ','ল','শ','স','হ','ং'];
+  for (let i = 0; i < 16; i++) {
+    const s = document.createElement('span');
+    s.className = 'particle';
+    s.textContent = letters[Math.floor(Math.random() * letters.length)];
+    s.style.left = (Math.random() * 100) + 'vw';
+    s.style.fontSize = (14 + Math.random() * 26) + 'px';
+    s.style.animationDuration = (9 + Math.random() * 10) + 's';
+    s.style.animationDelay = (Math.random() * 12) + 's';
+    document.body.appendChild(s);
+  }
+
+  // notify-me signup (Web3Forms)
+  const form = document.getElementById('notifyForm');
+  const box = document.getElementById('notifyBox');
+  const errMsg = document.getElementById('errMsg');
+  const btn = document.getElementById('notifyBtn');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errMsg.textContent = '';
+    const email = document.getElementById('email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errMsg.textContent = 'সঠিক email দিয়ক।';
+      return;
+    }
+    btn.disabled = true; btn.textContent = 'পঠিওৱা হৈ আছে…';
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: 'dd136e0b-9b10-48d4-91e5-6a4aa4598625',
+          subject: 'Artho launch — notify me signup',
+          from_name: 'Artho Launch Page',
+          email: email,
+          message: 'Please notify me when the Artho app launches: ' + email
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        box.innerHTML = '<div class="done">ধন্যবাদ!<br>মুক্তিৰ দিনা আপোনাক জনাম।</div>';
+      } else {
+        throw new Error('failed');
+      }
+    } catch (err) {
+      errMsg.textContent = 'কিবা ভুল হ’ল। অলপ পাছত চেষ্টা কৰক।';
+      btn.disabled = false; btn.textContent = 'জনাওক';
+    }
+  });
+</script>
+</body>
+</html>

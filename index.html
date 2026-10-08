@@ -470,6 +470,7 @@
           : '<div style="color:var(--muted)">No meanings listed.</div>');
       card.innerHTML = html;
       card.dataset.word = entry.word;
+      card.dataset.enMeaning = entry.m01 || '';
       card.dataset.meanings = JSON.stringify(meanings);
       resultDiv.appendChild(card);
     });
@@ -486,7 +487,7 @@
     try { meanings = JSON.parse(card.dataset.meanings || '[]'); } catch (e) { meanings = []; }
     var act = btn.dataset.act;
     if (act === 'share') shareWord(word, meanings);
-    if (act === 'listen') listenWord(btn, word);
+    if (act === 'listen') listenWord(btn, word, card ? card.dataset.enMeaning || '' : '');
   });
 
   /* ---------- text-to-speech ---------- */
@@ -495,11 +496,12 @@
     speechSynthesis.getVoices();
     speechSynthesis.onvoiceschanged = function () { speechSynthesis.getVoices(); };
   }
-  function listenWord(btn, word) {
+  function listenWord(btn, word, enMeaning) {
     if (!('speechSynthesis' in window)) { toast('Voice not supported on this device'); return; }
     try {
       speechSynthesis.cancel();
-      var u = new SpeechSynthesisUtterance(word);
+      var text = enMeaning ? word + '. ' + enMeaning : word;
+      var u = new SpeechSynthesisUtterance(text);
       var voices = speechSynthesis.getVoices() || [];
       var v = voices.filter(function (x) {
         return x.lang && x.lang.toLowerCase().indexOf('en') === 0;

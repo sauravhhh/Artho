@@ -87,6 +87,12 @@
     align-items:center; justify-content:center;
   }
   #clearBtn.show { display:flex; }
+  #idiomClearBtn {
+    display:none; width:38px; height:38px; border-radius:50%; border:none; flex-shrink:0;
+    background:var(--border); color:var(--muted); font-size:16px; cursor:pointer;
+    align-items:center; justify-content:center;
+  }
+  #idiomClearBtn.show { display:flex; }
 
   /* ---------- results ---------- */
   .wrap { max-width:640px; margin:0 auto; padding:16px 16px 96px; }
@@ -183,6 +189,7 @@
 <nav class="drawer" id="drawer" aria-label="Menu">
   <div class="drawer-head"><span class="dot"></span><span>অর্থ<em>.</em></span></div>
   <button class="drawer-item active" data-view="dict"><i class="fas fa-book-open"></i>Dictionary</button>
+  <button class="drawer-item" data-view="idioms"><i class="fas fa-quote-left"></i>Phrase And Idioms</button>
   <button class="drawer-item" data-view="about"><i class="fas fa-circle-info"></i>About</button>
   <div class="drawer-foot">Artho v1.0</div>
 </nav>
@@ -213,6 +220,17 @@
   <div id="result"></div>
 </main>
 
+<section class="wrap idioms-view" id="idiomsView" hidden>
+  <div class="searchbar">
+    <i class="fas fa-search"></i>
+    <input id="idiomInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+      placeholder="Search phrases and idioms..." enterkeyhint="search">
+    <button id="idiomClearBtn" class="idiom-clear" aria-label="Clear search"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="result-meta" id="idiomMeta"></div>
+  <div id="idiomList"></div>
+</section>
+
 <section class="wrap about-view" id="aboutView" hidden>
   <div class="word-card about-card">
     <h2>About Artho</h2>
@@ -227,6 +245,7 @@
 
 <footer class="foot">Made with ❤️ by sauravhhh</footer>
 
+<script src="idioms.js"></script>
 <script>
 (function () {
   'use strict';
@@ -260,16 +279,24 @@
 
   /* ---------- hamburger drawer + views ---------- */
   var menuBtn = $('menuBtn'), drawer = $('drawer'), backdrop = $('drawerBackdrop'),
-      aboutView = $('aboutView'),
-      dictViews = [document.querySelector('.sticky'), document.querySelector('main.wrap')];
+      aboutView = $('aboutView'), idiomsView = $('idiomsView'),
+      stickyEl = document.querySelector('.sticky'),
+      controlsEl = document.querySelector('.controls'),
+      mainEl = document.querySelector('main.wrap');
   function openDrawer() { drawer.classList.add('open'); backdrop.classList.add('show'); }
   function closeDrawer() { drawer.classList.remove('open'); backdrop.classList.remove('show'); }
   menuBtn.addEventListener('click', openDrawer);
   backdrop.addEventListener('click', closeDrawer);
   function showView(v) {
-    var about = v === 'about';
+    var about = v === 'about', idioms = v === 'idioms';
     aboutView.hidden = !about;
-    dictViews.forEach(function (el) { if (el) el.style.display = about ? 'none' : ''; });
+    idiomsView.hidden = !idioms;
+    // About keeps its existing behavior (whole header hidden).
+    // Idioms keeps the topbar (menu button) visible, hiding only the
+    // dictionary search controls and results.
+    stickyEl.style.display = about ? 'none' : '';
+    controlsEl.style.display = idioms ? 'none' : '';
+    mainEl.style.display = (about || idioms) ? 'none' : '';
     document.querySelectorAll('.drawer-item').forEach(function (b) {
       b.classList.toggle('active', b.dataset.view === v);
     });
@@ -283,7 +310,10 @@
       else { location.hash = h; }
     });
   });
-  function applyHash() { showView(location.hash === '#about' ? 'about' : 'dict'); }
+  function applyHash() {
+    var h = location.hash;
+    showView(h === '#about' ? 'about' : h === '#idioms' ? 'idioms' : 'dict');
+  }
   window.addEventListener('hashchange', applyHash);
   applyHash();
 
@@ -516,6 +546,32 @@
       copyFallback();
     }
   }
+  /* ---------- phrase and idioms ---------- */
+  var idiomInput = $('idiomInput'), idiomList = $('idiomList'),
+      idiomMeta = $('idiomMeta'), idiomClearBtn = $('idiomClearBtn');
+  function renderIdioms() {
+    var q = idiomInput.value.trim().toLowerCase();
+    var items = (window.IDIOMS || []).filter(function (it) {
+      return !q || it.p.toLowerCase().indexOf(q) !== -1 ||
+        (it.m && it.m.toLowerCase().indexOf(q) !== -1);
+    });
+    idiomMeta.textContent = items.length === 1 ? '1 phrase' : items.length + ' phrases';
+    idiomList.innerHTML = items.map(function (it) {
+      return '<div class="word-card">' +
+        '<div class="word-title" style="font-size:19px">' + sanitize(it.p) + '</div>' +
+        (it.m ? '<div style="color:var(--muted);margin-top:8px;font-size:15px;line-height:1.5">' + sanitize(it.m) + '</div>' : '') +
+      '</div>';
+    }).join('') || '<div class="no-results"><i class="fas fa-search"></i><p>No phrases found.</p></div>';
+    idiomClearBtn.classList.toggle('show', !!idiomInput.value);
+  }
+  idiomInput.addEventListener('input', renderIdioms);
+  idiomClearBtn.addEventListener('click', function () {
+    idiomInput.value = '';
+    renderIdioms();
+    idiomInput.focus();
+  });
+  renderIdioms();
+
   // Register service worker for installable PWA + offline use
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {

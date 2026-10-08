@@ -457,7 +457,7 @@
     try { meanings = JSON.parse(card.dataset.meanings || '[]'); } catch (e) { meanings = []; }
     var act = btn.dataset.act;
     if (act === 'share') shareWord(word, meanings);
-    if (act === 'listen') listenWord(btn, word, meanings);
+    if (act === 'listen') listenWord(btn, word);
   });
 
   /* ---------- text-to-speech ---------- */
@@ -466,12 +466,11 @@
     speechSynthesis.getVoices();
     speechSynthesis.onvoiceschanged = function () { speechSynthesis.getVoices(); };
   }
-  function listenWord(btn, word, meanings) {
+  function listenWord(btn, word) {
     if (!('speechSynthesis' in window)) { toast('Voice not supported on this device'); return; }
     try {
       speechSynthesis.cancel();
-      var text = word + '. ' + (meanings || []).filter(Boolean).join('. ');
-      var u = new SpeechSynthesisUtterance(text);
+      var u = new SpeechSynthesisUtterance(word);
       var voices = speechSynthesis.getVoices() || [];
       var v = voices.filter(function (x) {
         return x.lang && x.lang.toLowerCase().indexOf('en') === 0;

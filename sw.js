@@ -1,5 +1,8 @@
-/* Artho service worker: offline-first for the app shell */
-const CACHE = 'artho-v12';
+/* Artho service worker.
+   Page navigations: network first, so updates show up immediately on reload
+   (cache is only the offline fallback).
+   Static assets: cache first for speed. */
+const CACHE = 'artho-v13';
 const CORE = [
   '.',
   'index.html',
@@ -27,11 +30,21 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).then((res) => {
+        var copy = res.clone();
+        caches.open(CACHE).then((cache) => cache.put('index.html', copy));
+        return res;
+      }).catch(() => caches.match('index.html'))
+    );
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then((hit) => {
       if (hit) return hit;
       return fetch(event.request).then((res) => {
-        const copy = res.clone();
+        var copy = res.clone();
         if (new URL(event.request.url).origin === self.location.origin) {
           caches.open(CACHE).then((cache) => cache.put(event.request, copy));
         }

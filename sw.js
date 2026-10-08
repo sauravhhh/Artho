@@ -1,5 +1,5 @@
 /* Artho service worker: offline-first for the app shell */
-const CACHE = 'artho-v11';
+const CACHE = 'artho-v12';
 const CORE = [
   '.',
   'index.html',

@@ -426,6 +426,7 @@
         '<div class="word-header">' +
           '<div class="word-title">' + sanitize(entry.word) + '</div>' +
           '<div class="word-actions">' +
+            '<button title="Listen" aria-label="Listen" data-act="listen"><i class="fas fa-volume-up"></i></button>' +
             '<button title="Share" aria-label="Share" data-act="share"><i class="fas fa-share-alt"></i></button>' +
           '</div>' +
         '</div>' +
@@ -454,7 +455,33 @@
     try { meanings = JSON.parse(card.dataset.meanings || '[]'); } catch (e) { meanings = []; }
     var act = btn.dataset.act;
     if (act === 'share') shareWord(word, meanings);
+    if (act === 'listen') listenWord(btn, word);
   });
+
+  /* ---------- text-to-speech ---------- */
+  if ('speechSynthesis' in window) {
+    // Warm the voice list; Chrome loads voices asynchronously.
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = function () { speechSynthesis.getVoices(); };
+  }
+  function listenWord(btn, word) {
+    if (!('speechSynthesis' in window)) { toast('Voice not supported on this device'); return; }
+    try {
+      speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(word);
+      var wantLang = searchDirection === 'enToAs' ? 'en' : 'as';
+      var voices = speechSynthesis.getVoices() || [];
+      var v = voices.filter(function (x) {
+        return x.lang && x.lang.toLowerCase().indexOf(wantLang) === 0;
+      })[0];
+      if (v) { u.voice = v; u.lang = v.lang; }
+      else { u.lang = wantLang === 'en' ? 'en-US' : 'as-IN'; }
+      u.rate = 0.95;
+      btn.classList.add('active');
+      u.onend = u.onerror = function () { btn.classList.remove('active'); };
+      speechSynthesis.speak(u);
+    } catch (e) { toast('Could not play audio'); }
+  }
 
   function shareWord(word, meanings) {
     var lines = ['"' + word + '"'];

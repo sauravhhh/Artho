@@ -281,6 +281,7 @@
   /* ---------- hamburger drawer + views ---------- */
   var menuBtn = $('menuBtn'), drawer = $('drawer'), backdrop = $('drawerBackdrop'),
       aboutView = $('aboutView'), idiomsView = $('idiomsView'),
+      stickyEl = document.querySelector('.sticky'),
       controlsEl = document.querySelector('.controls'),
       mainEl = document.querySelector('main.wrap');
   function openDrawer() { drawer.classList.add('open'); backdrop.classList.add('show'); }
@@ -293,7 +294,9 @@
     idiomsView.hidden = !idioms;
     // The topbar (menu button, theme toggle) always stays visible, so the
     // menu is reachable from every view. Only the dictionary search controls
-    // and results hide on the About / Idioms screens.
+    // and results hide on the About / Idioms screens, along with the header's
+    // bottom border line (it would otherwise sit oddly right under the topbar).
+    stickyEl.style.borderBottom = (about || idioms) ? 'none' : '';
     controlsEl.style.display = (about || idioms) ? 'none' : '';
     mainEl.style.display = (about || idioms) ? 'none' : '';
     document.querySelectorAll('.drawer-item').forEach(function (b) {

@@ -1,8 +1,9 @@
 /* Artho service worker: offline-first for the app shell */
-const CACHE = 'artho-v7';
+const CACHE = 'artho-v8';
 const CORE = [
   '.',
   'index.html',
+  'idioms.js',
   'manifest.json',
   'icon-192.png',
   'icon-512.png',

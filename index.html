@@ -467,18 +467,22 @@
     var url = window.location.href;
     var fullText = text + '\n' + url;
     function copyFallback() {
+      // Clipboard copy only — never a prompt() dialog. If the clipboard
+      // write is blocked, stay silent rather than interrupting the user.
       if (navigator.clipboard) {
         navigator.clipboard.writeText(fullText).then(
           function () { toast('Copied to clipboard'); },
-          function () { prompt('Copy this text:', fullText); });
-      } else {
-        prompt('Copy this text:', fullText);
+          function () {});
       }
     }
     if (navigator.share) {
       try {
         navigator.share({ title: 'অর্থ - Assamese Dictionary', text: text, url: url })
-          .catch(function () { copyFallback(); });
+          .catch(function (err) {
+            // Cancelling the share sheet is not a failure — stay silent.
+            if (err && err.name === 'AbortError') return;
+            copyFallback();
+          });
       } catch (e) { copyFallback(); }
     } else {
       copyFallback();

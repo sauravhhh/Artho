@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Artho Beta — Assamese Dictionary</title>
+<meta name="description" content="Artho beta: minimal Assamese dictionary with autocomplete and example sentences.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111111'/%3E%3Ctext x='32' y='44' font-size='36' text-anchor='middle' fill='white' font-family='serif'%3E%E0%A6%85%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@700;900&family=Noto+Sans+Bengali:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#111;--muted:#8a8a8a;--line:#ececec;--soft:#f6f6f6}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Noto Sans Bengali',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:#fff;color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:620px;margin:0 auto;padding:0 20px 80px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:26px 0 6px}
+  .brand{font-family:'Noto Serif Bengali',serif;font-weight:900;font-size:30px;letter-spacing:.5px}
+  .beta{
+    font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+    border:1px solid var(--ink);border-radius:999px;padding:5px 14px;
+  }
+  .tagline{color:var(--muted);font-size:14px;margin-bottom:26px}
+  .seg{display:flex;background:var(--soft);border-radius:14px;padding:4px;margin-bottom:14px}
+  .seg button{
+    flex:1;border:0;background:transparent;padding:11px 6px;border-radius:10px;
+    font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;
+  }
+  .seg button.active{background:#fff;color:var(--ink);box-shadow:0 1px 5px rgba(0,0,0,.12)}
+  .searchwrap{position:relative}
+  .searchbox{
+    display:flex;align-items:center;gap:10px;background:var(--soft);
+    border:1.5px solid transparent;border-radius:16px;padding:4px 6px 4px 18px;
+  }
+  .searchbox:focus-within{border-color:var(--ink);background:#fff}
+  .searchbox svg{flex-shrink:0;color:var(--muted)}
+  .searchbox input{
+    flex:1;min-width:0;border:0;background:transparent;outline:0;
+    font-family:inherit;font-size:18px;color:var(--ink);padding:13px 0;
+  }
+  .searchbox input::placeholder{color:var(--muted)}
+  .clear{
+    display:none;width:38px;height:38px;border-radius:50%;border:0;flex-shrink:0;
+    background:#e8e8e8;color:#666;font-size:16px;cursor:pointer;align-items:center;justify-content:center;
+  }
+  .clear.show{display:flex}
+  .suggest{
+    position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:30;
+    background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    box-shadow:0 12px 32px rgba(0,0,0,.10);display:none;max-height:320px;overflow-y:auto;
+  }
+  .suggest.show{display:block}
+  .suggest button{
+    display:block;width:100%;text-align:left;border:0;background:#fff;cursor:pointer;
+    font-family:inherit;font-size:17px;color:var(--ink);padding:13px 18px;
+  }
+  .suggest button + button{border-top:1px solid var(--line)}
+  .suggest button.hl,.suggest button:hover{background:var(--soft)}
+  .suggest button b{font-weight:600}
+  .suggest .dim{color:var(--muted);font-weight:400}
+  #result{margin-top:8px}
+  .meta{font-size:13px;color:var(--muted);margin:14px 2px 10px}
+  .card{border-top:1px solid var(--ink);padding:20px 2px 8px;margin-bottom:26px}
+  .whead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .wtitle{font-family:'Noto Serif Bengali',serif;font-weight:900;font-size:32px;line-height:1.3;overflow-wrap:anywhere}
+  .wsub{color:var(--muted);font-size:15px;margin-top:2px}
+  .acts{display:flex;gap:6px;flex-shrink:0}
+  .acts button{
+    width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:#fff;
+    cursor:pointer;display:grid;place-items:center;color:var(--ink);
+  }
+  .acts button:active{background:var(--soft)}
+  .pos{
+    display:inline-block;font-size:12.5px;font-weight:600;letter-spacing:.4px;
+    border:1px solid var(--line);border-radius:999px;padding:4px 14px;margin:12px 0 4px;color:var(--muted);
+  }
+  .meanings{list-style:none;margin-top:6px}
+  .meanings li{font-size:17px;padding:8px 0 8px 20px;position:relative;border-bottom:1px solid var(--line)}
+  .meanings li:last-child{border-bottom:0}
+  .meanings li::before{content:"";position:absolute;left:2px;top:17px;width:7px;height:7px;border-radius:50%;background:var(--ink)}
+  .ex-title{font-size:13px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+  .ex{background:var(--soft);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+  .ex .s{font-family:'Noto Serif Bengali',serif;font-size:17.5px}
+  .ex .t{color:var(--muted);font-size:15px;margin-top:4px}
+  .ex .row{display:flex;gap:16px;margin-top:10px}
+  .ex .row button{
+    border:0;background:transparent;padding:0;font-family:inherit;font-size:13.5px;font-weight:600;
+    color:var(--ink);cursor:pointer;opacity:.65;
+  }
+  .ex .row button:active{opacity:1}
+  .empty{text-align:center;color:var(--muted);padding:60px 20px;font-size:15px}
+  .loading{text-align:center;color:var(--muted);padding:48px 0;font-size:15px}
+  .spin{display:inline-block;width:22px;height:22px;border:2.5px solid var(--line);border-top-color:var(--ink);border-radius:50%;animation:sp 0.8s linear infinite;vertical-align:-4px;margin-right:10px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translate(-50%,12px);
+    background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;
+    opacity:0;pointer-events:none;transition:all .25s ease;z-index:100;max-width:calc(100vw - 40px);text-align:center;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  footer{text-align:center;color:var(--muted);font-size:12.5px;padding:0 20px 30px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">অৰ্থ</div>
+    <div class="beta">Beta</div>
+  </header>
+  <p class="tagline">Minimal dictionary · autocomplete · example sentences</p>
+
+  <div class="seg" id="dirSeg">
+    <button class="active" data-dir="enToAs">English → Assamese</button>
+    <button data-dir="asToEn">Assamese → English</button>
+  </div>
+
+  <div class="searchwrap">
+    <div class="searchbox">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+      <input id="q" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+        placeholder="Search for an English word…" enterkeyhint="search">
+      <button class="clear" id="clearBtn" aria-label="Clear">✕</button>
+    </div>
+    <div class="suggest" id="suggest"></div>
+  </div>
+
+  <div id="result"></div>
+</div>
+<footer>Artho beta — by Saurabh Saha</footer>
+<div class="toast" id="toast"></div>
+
+<script src="examples.js"></script>
+<script>
+(function(){
+'use strict';
+var API='https://www.xobdo.org/api/dic.php', MAX=12;
+var dir='enToAs', seq=0, aborter=null, words=[], wordsReady=false, hlIndex=-1;
+
+function $(id){return document.getElementById(id);}
+var q=$('q'), box=$('suggest'), res=$('result'), clearBtn=$('clearBtn'), toastEl=$('toast'), toastT=null;
+
+function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove('show');},2200);}
+function esc(s){var d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+function clean(s){return (s==null?'':String(s)).trim();}
+
+/* ---------- word lists for autocomplete (lazy) ---------- */
+function loadWords(){
+  words=[];wordsReady=false;hlIndex=-1;
+  var f=dir==='enToAs'?'words-en.txt':'words-as.txt';
+  fetch(f).then(function(r){if(!r.ok)throw 0;return r.text();}).then(function(t){
+    words=t.split('\n').map(function(w){return w.trim();}).filter(Boolean);
+    wordsReady=true;
+  }).catch(function(){});
+}
+loadWords();
+
+/* ---------- direction ---------- */
+document.querySelectorAll('#dirSeg button').forEach(function(b){
+  b.addEventListener('click',function(){
+    if(b.dataset.dir===dir)return;
+    dir=b.dataset.dir;
+    document.querySelectorAll('#dirSeg button').forEach(function(x){x.classList.toggle('active',x===b);});
+    q.placeholder=dir==='enToAs'?'Search for an English word…':'এটা অসমীয়া শব্দ বিচাৰক…';
+    loadWords();hideSuggest();
+    if(clean(q.value))doSearch(q.value);
+  });
+});
+
+/* ---------- autocomplete ---------- */
+function hideSuggest(){box.classList.remove('show');box.innerHTML='';hlIndex=-1;}
+function matches(prefix){
+  var p=dir==='enToAs'?prefix.toLowerCase():prefix, out=[];
+  for(var i=0;i<words.length&&out.length<8;i++){
+    var w=words[i], c=dir==='enToAs'?w.toLowerCase():w;
+    if(c.indexOf(p)===0&&c!==p)out.push(w);
+  }
+  return out;
+}
+function renderSuggest(list,prefix){
+  if(!list.length){hideSuggest();return;}
+  var html='';
+  list.forEach(function(w,i){
+    var c=dir==='enToAs'?w.toLowerCase():w, p=dir==='enToAs'?prefix.toLowerCase():prefix;
+    html+='<button data-i="'+i+'" class="'+(i===hlIndex?'hl':'')+'"><b>'+esc(w.slice(0,p.length))+'</b><span class="dim">'+esc(w.slice(p.length))+'</span></button>';
+  });
+  box.innerHTML=html;box.classList.add('show');
+  box.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('mousedown',function(e){e.preventDefault();pick(list[+b.dataset.i]);});
+  });
+}
+function pick(w){q.value=w;clearBtn.classList.toggle('show',true);hideSuggest();doSearch(w);q.blur();}
+
+var deb=null, lastPrefix='';
+q.addEventListener('input',function(){
+  clearBtn.classList.toggle('show',!!q.value);
+  clearTimeout(deb);
+  var v=clean(q.value);
+  if(v.length>=2&&wordsReady){
+    var m=matches(v);
+    if(v!==lastPrefix)hlIndex=-1;
+    lastPrefix=v;renderSuggest(m,v);
+  }else hideSuggest();
+  deb=setTimeout(function(){doSearch(q.value);},350);
+});
+q.addEventListener('keydown',function(e){
+  var items=box.querySelectorAll('button');
+  if(box.classList.contains('show')&&items.length){
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+      e.preventDefault();
+      hlIndex=e.key==='ArrowDown'?(hlIndex+1)%items.length:(hlIndex-1+items.length)%items.length;
+      items.forEach(function(b,i){b.classList.toggle('hl',i===hlIndex);});
+      items[hlIndex].scrollIntoView({block:'nearest'});
+      return;
+    }
+    if(e.key==='Enter'&&hlIndex>=0){e.preventDefault();pick(items[hlIndex].textContent);return;}
+    if(e.key==='Escape'){hideSuggest();return;}
+  }
+  if(e.key==='Enter'){clearTimeout(deb);hideSuggest();doSearch(q.value);}
+});
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.searchwrap'))hideSuggest();
+});
+clearBtn.addEventListener('click',function(){q.value='';clearBtn.classList.remove('show');hideSuggest();hint();q.focus();});
+
+/* ---------- search (XOBDO API) ---------- */
+function hint(){res.innerHTML='<div class="empty">Type a word to look it up.<br>Suggestions appear as you type.</div>';}
+function loading(){res.innerHTML='<div class="loading"><span class="spin"></span>Looking up…</div>';}
+function err(){res.innerHTML='<div class="empty">Couldn\'t reach the dictionary.<br>Check your connection and try again.</div>';}
+hint();
+
+function apiSearch(term,s){
+  if(aborter){try{aborter.abort();}catch(e){}}
+  aborter=new AbortController();
+  var lang=dir==='enToAs'?'1':'2';
+  return fetch(API+'?w='+encodeURIComponent(term)+'&l='+lang,{signal:aborter.signal}).then(function(r){
+    if(!r.ok)throw new Error('http');return r.json();
+  }).then(function(d){
+    if(s!==seq)return null;
+    var out=[],seen={},qws=(d&&d.querywords)||[];
+    for(var i=0;i<qws.length;i++){
+      var qw=qws[i]||{},word=clean(qw.queryword&&qw.queryword.word)||term;
+      var ens=(qw.result&&qw.result.entries)||[];
+      for(var j=0;j<ens.length;j++){
+        var en=ens[j]||{},key=String(en.ideaid||'')+'|'+word;
+        if(seen[key])continue;seen[key]=1;
+        out.push({word:word,grammar:clean(en.grammar),m01:clean(en.m01),m02:clean(en.m02)});
+        if(out.length>=MAX)break;
+      }
+      if(out.length>=MAX)break;
+    }
+    return out;
+  });
+}
+
+function doSearch(term){
+  var t=clean(term);
+  if(!t){if(aborter){try{aborter.abort();}catch(e){}}hint();return;}
+  var s=++seq;loading();
+  apiSearch(t,s).then(function(es){
+    if(es===null||s!==seq)return;
+    render(t,es);
+  }).catch(function(e){if(e&&e.name==='AbortError')return;if(s!==seq)return;err();});
+}
+
+function examplesFor(word){
+  var ex=window.ARTHO_EXAMPLES||{};
+  var k=dir==='enToAs'?word.toLowerCase():word;
+  return ex[k]||ex[word]||null;
+}
+
+function render(term,entries){
+  res.innerHTML='';
+  if(!entries.length){
+    res.innerHTML='<div class="empty">No results for “<b>'+esc(term)+'</b>”.<br>Check the spelling and try again.</div>';
+    return;
+  }
+  var meta=document.createElement('p');meta.className='meta';
+  meta.textContent=entries.length===1?'1 result':entries.length+' results';
+  res.appendChild(meta);
+  entries.forEach(function(en){
+    var meanings=[en.m01,en.m02].filter(Boolean);
+    var exs=examplesFor(en.word);
+    var card=document.createElement('div');card.className='card';
+    var h='<div class="whead"><div><div class="wtitle">'+esc(en.word)+'</div></div>'+
+      '<div class="acts">'+
+      '<button data-act="listen" aria-label="Listen"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.4 9.4 0 0 1 0 13"/></svg></button>'+
+      '<button data-act="share" aria-label="Share"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg></button>'+
+      '</div></div>'+
+      (en.grammar?'<div class="pos">'+esc(en.grammar)+'</div>':'')+
+      (meanings.length?'<ul class="meanings">'+meanings.map(function(m){return '<li>'+esc(m)+'</li>';}).join('')+'</ul>':'<p style="color:var(--muted)">No meanings listed.</p>');
+    if(exs){
+      h+='<div class="ex-title">উদাহৰণ · Examples</div>';
+      exs.forEach(function(p){
+        h+='<div class="ex"><div class="s">'+esc(p[0])+'</div><div class="t">'+esc(p[1])+'</div>'+
+           '<div class="row"><button data-act="ex-listen" data-s="'+esc(p[0])+'">Listen</button>'+
+           '<button data-act="ex-copy" data-s="'+esc(p[0])+'">Copy</button></div></div>';
+      });
+    }
+    card.innerHTML=h;
+    card.dataset.word=en.word;
+    card.dataset.meanings=JSON.stringify(meanings);
+    res.appendChild(card);
+  });
+}
+
+/* ---------- actions ---------- */
+res.addEventListener('click',function(e){
+  var btn=e.target.closest('button[data-act]');if(!btn)return;
+  var act=btn.dataset.act,card=btn.closest('.card');
+  var word=card?card.dataset.word:'';
+  var meanings=[];try{meanings=JSON.parse(card.dataset.meanings||'[]');}catch(x){}
+  if(act==='listen')speak(word,meanings[0]||'');
+  else if(act==='share')share(word,meanings);
+  else if(act==='ex-listen')speak(btn.dataset.s,'');
+  else if(act==='ex-copy'&&navigator.clipboard){
+    navigator.clipboard.writeText(btn.dataset.s).then(function(){toast('Copied');},function(){});
+  }
+});
+if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=function(){speechSynthesis.getVoices();};}
+function speak(text,extra){
+  if(!('speechSynthesis' in window)){toast('Voice not supported');return;}
+  try{
+    speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(extra?text+'. '+extra:text);
+    var vs=speechSynthesis.getVoices()||[];
+    var v=vs.filter(function(x){return x.lang&&x.lang.toLowerCase().indexOf('en')===0;})[0];
+    u.lang=v?v.lang:'en-US';if(v)u.voice=v;u.rate=0.95;
+    speechSynthesis.speak(u);
+  }catch(e){toast('Could not play audio');}
+}
+function share(word,meanings){
+  var lines=['"'+word+'"'];
+  (meanings||[]).slice(0,5).forEach(function(m,i){if(m)lines.push((i+1)+'. '+m);});
+  lines.push('','— via অর্থ Assamese Dictionary (beta)');
+  var text=lines.join('\n');
+  if(navigator.share){
+    try{navigator.share({title:'অর্থ beta',text:text,url:location.href}).catch(function(e){if(e&&e.name==='AbortError')return;});}catch(e){}
+  }else if(navigator.clipboard){navigator.clipboard.writeText(text+'\n'+location.href).then(function(){toast('Copied');},function(){});}
+}
+})();
+</script>
+</body>
+</html>
